@@ -1,0 +1,11 @@
+## 构建产物
+bin/
+obj/
+.vs/
+*.user
+
+## 截图（开发临时输出，正式截图在 docs/）
+/shot_*.png
+
+## IDE / 工具
+.zcode*

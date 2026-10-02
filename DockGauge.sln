@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A53F9A06-89DA-439C-AD96-F1DD20A9BD11}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DockGauge", "src\DockGauge\DockGauge.csproj", "{6AECF13F-B9D9-45C5-BFB5-244CD5044388}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6AECF13F-B9D9-45C5-BFB5-244CD5044388}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AECF13F-B9D9-45C5-BFB5-244CD5044388}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AECF13F-B9D9-45C5-BFB5-244CD5044388}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AECF13F-B9D9-45C5-BFB5-244CD5044388}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6AECF13F-B9D9-45C5-BFB5-244CD5044388} = {A53F9A06-89DA-439C-AD96-F1DD20A9BD11}
+	EndGlobalSection
+EndGlobal
