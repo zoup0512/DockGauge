@@ -26,6 +26,7 @@ public partial class MainWindow : Window
     private WinForms.ToolStripMenuItem? _trayTop, _trayAuto;
     private AppConfig _cfg = new();
     private bool _expanded;
+    private double _compactLeft, _compactTop; // 紧凑条锚点：展开的基准 / 收起的还原位
     private int _driveCounter;
 
     public MainWindow()
@@ -231,26 +232,42 @@ public partial class MainWindow : Window
     private void SetExpanded(bool expanded)
     {
         if (Visibility != Visibility.Visible) Visibility = Visibility.Visible;
-        _expanded = expanded;
         var wa = SystemParameters.WorkArea;
 
-        double newW = expanded ? ExpandedWidth : CompactWidth;
-        double newH = expanded ? Math.Min(ExpandedMaxHeight, wa.Height - 16) : CompactHeight;
+        if (expanded)
+        {
+            // 以紧凑条当前位置为锚点展开；收起时精确还原，反复伸缩不漂移
+            _compactLeft = Left;
+            _compactTop = Top;
 
-        CompactRoot.Visibility = expanded ? Visibility.Collapsed : Visibility.Visible;
-        ExpandedRoot.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
+            double newH = Math.Min(ExpandedMaxHeight, wa.Height - 16);
+            CompactRoot.Visibility = Visibility.Collapsed;
+            ExpandedRoot.Visibility = Visibility.Visible;
+            Width = ExpandedWidth;
+            Height = newH;
+            Left = Math.Clamp(_compactLeft, wa.Left + 4, Math.Max(wa.Left + 4, wa.Right - Width - 4));
 
-        double right = Left + Width;
-        double bottom = Top + Height;
-        Width = newW;
-        Height = newH;
-        // 水平：保持右缘对齐（右上角停靠时展开不横跳）
-        Left = Math.Clamp(right - newW, wa.Left + 4, Math.Max(wa.Left + 4, wa.Right - newW - 4));
-        // 垂直：上半屏保持上缘向下展开，下半屏保持下缘向上展开
-        if (bottom - newH / 2 < wa.Top + wa.Height / 2)
-            Top = Math.Clamp(Top, wa.Top + 4, Math.Max(wa.Top + 4, wa.Bottom - newH - 4));
+            // 下拉菜单式定位：放得下向下展开，贴底向上展开，否则以锚点居中
+            double topBelow = _compactTop;
+            double topAbove = _compactTop + CompactHeight - newH;
+            double topCenter = _compactTop + CompactHeight / 2 - newH / 2;
+            if (topBelow + newH <= wa.Bottom - 4)
+                Top = topBelow;
+            else if (topAbove >= wa.Top + 4)
+                Top = topAbove;
+            else
+                Top = Math.Clamp(topCenter, wa.Top + 4, Math.Max(wa.Top + 4, wa.Bottom - newH - 4));
+        }
         else
-            Top = Math.Clamp(bottom - newH, wa.Top + 4, Math.Max(wa.Top + 4, wa.Bottom - newH - 4));
+        {
+            CompactRoot.Visibility = Visibility.Visible;
+            ExpandedRoot.Visibility = Visibility.Collapsed;
+            Width = CompactWidth;
+            Height = CompactHeight;
+            Left = _compactLeft;
+            Top = _compactTop;
+        }
+        _expanded = expanded;
     }
 
     private void PositionWindow()
@@ -267,6 +284,8 @@ public partial class MainWindow : Window
             Left = wa.Right - Width - 12;
             Top = wa.Top + 12;
         }
+        _compactLeft = Left;
+        _compactTop = Top;
     }
 
     private void RootDragMove(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -274,6 +293,19 @@ public partial class MainWindow : Window
         if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
         {
             try { DragMove(); } catch { /* 并发调用会抛异常，忽略 */ }
+            // 拖动后同步锚点：收起时悬浮条回到用户拖到的位置
+            if (_expanded)
+            {
+                _compactLeft = Left;
+                _compactTop = Top + Height / 2 < SystemParameters.WorkArea.Top + SystemParameters.WorkArea.Height / 2
+                    ? Top                                  // 面板在上半屏 → 悬浮条对齐面板顶部
+                    : Top + Height - CompactHeight;        // 面板在下半屏 → 悬浮条对齐面板底部
+            }
+            else
+            {
+                _compactLeft = Left;
+                _compactTop = Top;
+            }
         }
     }
 
