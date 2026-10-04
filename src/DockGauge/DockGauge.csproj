@@ -9,7 +9,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>DockGauge</RootNamespace>
     <AssemblyName>DockGauge</AssemblyName>
-    <Version>1.0.0</Version>
+    <Version>1.0.2</Version>
     <RollForward>LatestMajor</RollForward>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>

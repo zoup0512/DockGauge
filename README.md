@@ -29,7 +29,7 @@
 
 ## 下载
 
-到 [Releases](https://github.com/zoup0512/DockGauge/releases) 下载 `DockGauge-vX-win-x64.zip`，解压后运行 `DockGauge.exe` 即可（免安装；需要 [.NET Desktop Runtime 8](https://dotnet.microsoft.com/download/dotnet/8.0) 或更高版本）。
+到 [Releases](https://github.com/zoup0512/DockGauge/releases) 下载 `DockGauge-vX-win-x64.zip`，解压后运行 `DockGauge.exe` 即可（免安装；需要 [.NET Desktop Runtime 8](https://dotnet.microsoft.com/download/dotnet/8.0) 或更高版本）。版本历史见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 构建与运行
 
