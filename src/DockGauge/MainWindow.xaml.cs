@@ -47,7 +47,13 @@ public partial class MainWindow : Window
         InitTray();
 
         Loaded += OnLoaded;
-        Closing += (_, _) => { _cfg.Save(); };
+        Closing += (_, _) =>
+        {
+            // 位置只在关闭时持久化，避免菜单联动 Save 把未定位的坐标写进配置
+            _cfg.X = Left;
+            _cfg.Y = Top;
+            _cfg.Save();
+        };
     }
 
     // ---------- 生命周期 ----------
@@ -233,26 +239,32 @@ public partial class MainWindow : Window
         CompactRoot.Visibility = expanded ? Visibility.Collapsed : Visibility.Visible;
         ExpandedRoot.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
 
-        double cx = Left + Width / 2;
+        double right = Left + Width;
         double bottom = Top + Height;
         Width = newW;
         Height = newH;
-        Left = Math.Clamp(cx - newW / 2, wa.Left + 4, Math.Max(wa.Left + 4, wa.Right - newW - 4));
-        Top = Math.Clamp(bottom - newH, wa.Top + 4, Math.Max(wa.Top + 4, wa.Bottom - newH - 4));
+        // 水平：保持右缘对齐（右上角停靠时展开不横跳）
+        Left = Math.Clamp(right - newW, wa.Left + 4, Math.Max(wa.Left + 4, wa.Right - newW - 4));
+        // 垂直：上半屏保持上缘向下展开，下半屏保持下缘向上展开
+        if (bottom - newH / 2 < wa.Top + wa.Height / 2)
+            Top = Math.Clamp(Top, wa.Top + 4, Math.Max(wa.Top + 4, wa.Bottom - newH - 4));
+        else
+            Top = Math.Clamp(bottom - newH, wa.Top + 4, Math.Max(wa.Top + 4, wa.Bottom - newH - 4));
     }
 
     private void PositionWindow()
     {
         var wa = SystemParameters.WorkArea;
-        if (!double.IsNaN(_cfg.X) && !double.IsNaN(_cfg.Y))
+        if (_cfg.X.HasValue && _cfg.Y.HasValue)
         {
-            Left = Math.Clamp(_cfg.X, wa.Left, Math.Max(wa.Left, wa.Right - Width));
-            Top = Math.Clamp(_cfg.Y, wa.Top, Math.Max(wa.Top, wa.Bottom - Height));
+            Left = Math.Clamp(_cfg.X.Value, wa.Left, Math.Max(wa.Left, wa.Right - Width));
+            Top = Math.Clamp(_cfg.Y.Value, wa.Top, Math.Max(wa.Top, wa.Bottom - Height));
         }
         else
         {
-            Left = wa.Left + (wa.Width - Width) / 2;
-            Top = wa.Bottom - Height - 8;
+            // 默认停靠屏幕右上角（12 逻辑像素呼吸边距，避开圆角和阴影裁切）
+            Left = wa.Right - Width - 12;
+            Top = wa.Top + 12;
         }
     }
 
@@ -345,8 +357,9 @@ public class AppConfig
 {
     public bool Topmost { get; set; } = true;
     public bool AutoStart { get; set; }
-    public double X { get; set; } = double.NaN;
-    public double Y { get; set; } = double.NaN;
+    // null = 未保存过位置（首次启动用默认停靠位）
+    public double? X { get; set; }
+    public double? Y { get; set; }
 
     private static string Dir => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DockGauge");
@@ -368,8 +381,6 @@ public class AppConfig
         try
         {
             Directory.CreateDirectory(Dir);
-            X = Application.Current?.Windows.OfType<MainWindow>().FirstOrDefault()?.Left ?? X;
-            Y = Application.Current?.Windows.OfType<MainWindow>().FirstOrDefault()?.Top ?? Y;
             File.WriteAllText(FilePath, System.Text.Json.JsonSerializer.Serialize(this, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
         }
         catch { }

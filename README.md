@@ -45,7 +45,7 @@ dotnet build -c Release
 ./src/DockGauge/bin/Release/net8.0-windows/DockGauge.exe --expanded
 ```
 
-启动后悬浮条出现在屏幕底部居中，按住可拖动到任意位置；点击右侧箭头切换紧凑 / 展开视图。
+启动后悬浮条停靠在屏幕右上角，按住可拖动到任意位置；点击右侧箭头切换紧凑 / 展开视图。
 
 ## 工作原理
 
