@@ -132,16 +132,16 @@
                     <TextBlock x:Name="CNetDown" Grid.Row="1" Grid.Column="4" Text="0 B/s" Width="74"
                                TextAlignment="Right" FontSize="13.5" FontWeight="SemiBold" Foreground="{StaticResource TextDark}"/>
 
-                    <!-- CPU / RAM -->
-                    <TextBlock Grid.Row="0" Grid.Column="6" Text="CPU" FontSize="12.5" MinWidth="36"
-                               TextAlignment="Right" Foreground="{StaticResource TextGray}" Margin="0,0,8,0"/>
-                    <TextBlock Grid.Row="1" Grid.Column="6" Text="RAM" FontSize="12.5" MinWidth="36"
-                               TextAlignment="Right" Foreground="{StaticResource TextGray}" Margin="0,0,8,0"/>
+                    <!-- CPU / RAM（左对齐，上下两行字符纵向对齐） -->
+                    <TextBlock Grid.Row="0" Grid.Column="6" Text="CPU" FontSize="12.5" Width="36"
+                               TextAlignment="Left" Foreground="{StaticResource TextGray}" Margin="0,0,8,0"/>
+                    <TextBlock Grid.Row="1" Grid.Column="6" Text="RAM" FontSize="12.5" Width="36"
+                               TextAlignment="Left" Foreground="{StaticResource TextGray}" Margin="0,0,8,0"/>
                     <TextBlock x:Name="CCpu" Grid.Row="0" Grid.Column="7" Text="0%" Width="34"
-                               TextAlignment="Right" FontSize="13.5" FontWeight="SemiBold"
+                               TextAlignment="Left" FontSize="13.5" FontWeight="SemiBold"
                                Foreground="{StaticResource TextDark}"/>
                     <TextBlock x:Name="CRam" Grid.Row="1" Grid.Column="7" Text="0%" Width="34"
-                               TextAlignment="Right" FontSize="13.5" FontWeight="SemiBold"
+                               TextAlignment="Left" FontSize="13.5" FontWeight="SemiBold"
                                Foreground="{StaticResource TextDark}"/>
 
                     <!-- 展开/收起 -->

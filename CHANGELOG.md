@@ -2,6 +2,12 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [未发布]
+
+### 修复
+
+- 紧凑条 "CPU" / "RAM" 标签与百分比数值改为左对齐，上下两行字符纵向对齐（与设计稿一致）
+
 ## [v1.0.2] - 2026-10-04
 
 ### 修复
