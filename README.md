@@ -55,7 +55,7 @@ dotnet build -c Release
 | --- | --- |
 | CPU 占用 | `GetSystemTimes` 前后差值 |
 | 内存 | `GlobalMemoryStatusEx` |
-| 网络上下行 | 各活动网卡 `GetIPv4Statistics` 差值求和（排除回环 / 隧道） |
+| 网络上下行 | WMI `Win32_PerfFormattedData_Tcpip_NetworkInterface`（与任务管理器同源；排除回环 / 隧道 / 虚拟交换机，避免与物理网卡重复计数） |
 | 磁盘读写 | WMI `Win32_PerfFormattedData_PerfDisk_PhysicalDisk` |
 | 磁盘容量 | `DriveInfo`（固定磁盘） |
 | 开机时长 | `GetTickCount64` |

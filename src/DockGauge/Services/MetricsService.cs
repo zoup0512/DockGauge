@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.IO;
-using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 
 namespace DockGauge.Services;
@@ -30,7 +29,7 @@ public sealed class MetricsSample
 /// <summary>
 /// 每秒采样一次系统指标。
 /// CPU 用 GetSystemTimes 差值；内存用 GlobalMemoryStatusEx；
-/// 网络用各网卡 IPv4 统计差值；磁盘读写用 WMI 格式化性能计数（类名与系统语言无关）。
+/// 网络与磁盘读写用 WMI 格式化性能计数（与任务管理器同源，类名与系统语言无关）。
 /// </summary>
 public sealed class MetricsService
 {
@@ -82,44 +81,47 @@ public sealed class MetricsService
 
     private void SampleNetwork(MetricsSample s)
     {
-        var now = DateTime.UtcNow;
-        long up = 0, down = 0;
-        var seen = new HashSet<string>();
-
-        foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+        // 与任务管理器同源：WMI 格式化性能计数（NDIS 字节、含所有协议），cooked value 即 bytes/sec。
+        // 只统计物理网卡：回环 / 隧道（代理 TUN）/ 虚拟交换机（Hyper-V、WSL 等）的流量
+        // 会再次经过物理网卡，求和会重复计数，导致与任务管理器“以太网”口径相差很大。
+        try
         {
-            if (ni.OperationalStatus != OperationalStatus.Up) continue;
-            var t = ni.NetworkInterfaceType;
-            if (t == NetworkInterfaceType.Loopback || t == NetworkInterfaceType.Tunnel) continue;
-            if (ni.Name.Contains("Loopback", StringComparison.OrdinalIgnoreCase)) continue;
-
-            seen.Add(ni.Id);
-            IPv4InterfaceStatistics? st = null;
-            try { st = ni.GetIPv4Statistics(); } catch { continue; }
-            if (st is null) continue;
-
-            if (_lastNet.TryGetValue(ni.Id, out var prev))
+            double up = 0, down = 0;
+            using var searcher = new System.Management.ManagementObjectSearcher(
+                "root\\CIMV2",
+                "SELECT Name, BytesReceivedPersec, BytesSentPersec FROM Win32_PerfFormattedData_Tcpip_NetworkInterface");
+            foreach (var mo in searcher.Get())
             {
-                up += Math.Max(0, st.BytesSent - prev.Sent);
-                down += Math.Max(0, st.BytesReceived - prev.Recv);
+                var name = Convert.ToString(mo["Name"]);
+                if (IsVirtualOrLoopback(name)) continue;
+                up += Convert.ToDouble(mo["BytesSentPersec"] ?? 0.0);
+                down += Convert.ToDouble(mo["BytesReceivedPersec"] ?? 0.0);
             }
-            _lastNet[ni.Id] = (st.BytesSent, st.BytesReceived);
+            s.NetUploadBps = Math.Max(0, up);
+            s.NetDownloadBps = Math.Max(0, down);
         }
-
-        foreach (var stale in _lastNet.Keys.Where(k => !seen.Contains(k)).ToList())
-            _lastNet.Remove(stale);
-
-        if (_netSeeded)
+        catch
         {
-            var dt = (now - _netStamp).TotalSeconds;
-            if (dt > 0.2)
-            {
-                s.NetUploadBps = up / dt;
-                s.NetDownloadBps = down / dt;
-            }
+            // WMI 不可用时本拍保持 0，下一秒自动重试
         }
-        _netSeeded = true;
-        _netStamp = now;
+    }
+
+    /// <summary>是否为不应计入总量的虚拟 / 回环 / 隧道网卡（WMI 实例名为驱动描述）。</summary>
+    private static bool IsVirtualOrLoopback(string? name)
+    {
+        if (string.IsNullOrEmpty(name)) return true;
+        string[] exclude =
+        {
+            "Loopback", "isatap", "Teredo", "Tunnel",
+            "Virtual Ethernet", "VirtualBox", "VMware", "TAP-", "WinTun",
+            "OpenVPN", "WireGuard", "ZeroTier", "Tailscale", "TUN", "TAP",
+            "Wi-Fi Direct", "Bluetooth", "Kernel Debug", "WAN Miniport",
+        };
+        foreach (var p in exclude)
+        {
+            if (name.Contains(p, StringComparison.OrdinalIgnoreCase)) return true;
+        }
+        return false;
     }
 
     private void SampleDisk(MetricsSample s)
