@@ -5,7 +5,7 @@
         Title="DockGauge"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True"
-        Width="320" Height="48"
+        Width="270" Height="48"
         FontFamily="Microsoft YaHei UI" UseLayoutRounding="True"
         TextOptions.TextRenderingMode="ClearType" TextOptions.TextFormattingMode="Display">
 
@@ -93,10 +93,10 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="24"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="14"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
@@ -108,13 +108,13 @@
 
                     <!-- 磁盘读写 -->
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="R" Foreground="{StaticResource AccentBlue}"
-                               FontSize="14" FontWeight="Bold" TextAlignment="Center" Margin="0,0,10,0"/>
+                               FontSize="14" FontWeight="Bold" TextAlignment="Center" Margin="0,0,8,0"/>
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="W" Foreground="{StaticResource AccentGreen}"
-                               FontSize="14" FontWeight="Bold" TextAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBlock x:Name="CDiskRead" Grid.Row="0" Grid.Column="1" Text="0 B/s" Width="84"
+                               FontSize="14" FontWeight="Bold" TextAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock x:Name="CDiskRead" Grid.Row="0" Grid.Column="1" Text="0 B/s" Width="74"
                                TextAlignment="Right" FontSize="13.5" FontWeight="SemiBold"
                                Foreground="{StaticResource TextDark}"/>
-                    <TextBlock x:Name="CDiskWrite" Grid.Row="1" Grid.Column="1" Text="0 B/s" Width="84"
+                    <TextBlock x:Name="CDiskWrite" Grid.Row="1" Grid.Column="1" Text="0 B/s" Width="74"
                                TextAlignment="Right" FontSize="13.5" FontWeight="SemiBold"
                                Foreground="{StaticResource TextDark}"/>
 
@@ -127,26 +127,26 @@
                           Stroke="{StaticResource AccentGreen}" StrokeThickness="1.7"
                           StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
                           Width="12" Height="12" Stretch="None" Margin="0,0,5,0"/>
-                    <TextBlock x:Name="CNetUp" Grid.Row="0" Grid.Column="4" Text="0 B/s" Width="84"
+                    <TextBlock x:Name="CNetUp" Grid.Row="0" Grid.Column="4" Text="0 B/s" Width="74"
                                TextAlignment="Right" FontSize="13.5" FontWeight="SemiBold" Foreground="{StaticResource TextDark}"/>
-                    <TextBlock x:Name="CNetDown" Grid.Row="1" Grid.Column="4" Text="0 B/s" Width="84"
+                    <TextBlock x:Name="CNetDown" Grid.Row="1" Grid.Column="4" Text="0 B/s" Width="74"
                                TextAlignment="Right" FontSize="13.5" FontWeight="SemiBold" Foreground="{StaticResource TextDark}"/>
 
                     <!-- CPU / RAM -->
-                    <TextBlock Grid.Row="0" Grid.Column="6" Text="CPU" FontSize="12.5" MinWidth="38"
+                    <TextBlock Grid.Row="0" Grid.Column="6" Text="CPU" FontSize="12.5" MinWidth="36"
                                TextAlignment="Right" Foreground="{StaticResource TextGray}" Margin="0,0,8,0"/>
-                    <TextBlock Grid.Row="1" Grid.Column="6" Text="RAM" FontSize="12.5" MinWidth="38"
+                    <TextBlock Grid.Row="1" Grid.Column="6" Text="RAM" FontSize="12.5" MinWidth="36"
                                TextAlignment="Right" Foreground="{StaticResource TextGray}" Margin="0,0,8,0"/>
-                    <TextBlock x:Name="CCpu" Grid.Row="0" Grid.Column="7" Text="0%" Width="38"
+                    <TextBlock x:Name="CCpu" Grid.Row="0" Grid.Column="7" Text="0%" Width="34"
                                TextAlignment="Right" FontSize="13.5" FontWeight="SemiBold"
                                Foreground="{StaticResource TextDark}"/>
-                    <TextBlock x:Name="CRam" Grid.Row="1" Grid.Column="7" Text="0%" Width="38"
+                    <TextBlock x:Name="CRam" Grid.Row="1" Grid.Column="7" Text="0%" Width="34"
                                TextAlignment="Right" FontSize="13.5" FontWeight="SemiBold"
                                Foreground="{StaticResource TextDark}"/>
 
                     <!-- 展开/收起 -->
                     <Button Grid.Row="0" Grid.Column="8" Grid.RowSpan="2" Style="{StaticResource IconBtn}"
-                            Margin="12,0,0,0" VerticalAlignment="Center" Click="ToggleClick" ToolTip="展开面板">
+                            Margin="8,0,0,0" VerticalAlignment="Center" Click="ToggleClick" ToolTip="展开面板">
                         <Canvas Width="12" Height="13">
                             <Path Data="M1.8,2 L6,6.2 L10.2,2" Stroke="#3A404A" StrokeThickness="1.7"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>

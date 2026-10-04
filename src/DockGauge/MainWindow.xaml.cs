@@ -13,9 +13,9 @@ namespace DockGauge;
 public partial class MainWindow : Window
 {
     // 窗口尺寸 = 内容设计尺寸（Root 已整体 LayoutTransform 缩放 2/3）
-    // 紧凑条与展开面板同宽，切换时只变高度
-    private const double CompactWidth = 320, CompactHeight = 48;
-    private const double ExpandedWidth = 320, ExpandedMaxHeight = 700;
+    // 紧凑条与展开面板同宽（270）；速度值一位小数后列宽可收窄
+    private const double CompactWidth = 270, CompactHeight = 48;
+    private const double ExpandedWidth = 270, ExpandedMaxHeight = 700;
     private const int MaxPoints = 100;
 
     private readonly MetricsService _metrics = new();
