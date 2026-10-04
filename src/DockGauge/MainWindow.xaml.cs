@@ -1,8 +1,10 @@
+using Application = System.Windows.Application;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using Microsoft.Win32;
+using WinForms = System.Windows.Forms;
 using DockGauge.Controls;
 using DockGauge.Services;
 
@@ -10,14 +12,17 @@ namespace DockGauge;
 
 public partial class MainWindow : Window
 {
-    private const double CompactWidth = 480, CompactHeight = 72;
-    private const double ExpandedWidth = 404, ExpandedMaxHeight = 934;
+    // 窗口尺寸 = 内容设计尺寸（Root 已整体 LayoutTransform 缩放 2/3）
+    private const double CompactWidth = 320, CompactHeight = 48;
+    private const double ExpandedWidth = 270, ExpandedMaxHeight = 623;
     private const int MaxPoints = 100;
 
     private readonly MetricsService _metrics = new();
     private readonly List<double> _netUp = new(), _netDown = new(), _diskR = new(), _diskW = new();
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(1) };
     private readonly MenuItem _menuTopmost, _menuAutoStart;
+    private WinForms.NotifyIcon? _tray;
+    private WinForms.ToolStripMenuItem? _trayTop, _trayAuto;
     private AppConfig _cfg = new();
     private bool _expanded;
     private int _driveCounter;
@@ -39,9 +44,13 @@ public partial class MainWindow : Window
         _menuTopmost = (MenuItem)menu.Items[0];
         _menuAutoStart = (MenuItem)menu.Items[1];
 
+        InitTray();
+
         Loaded += OnLoaded;
         Closing += (_, _) => { _cfg.Save(); };
     }
+
+    // ---------- 生命周期 ----------
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
@@ -59,6 +68,97 @@ public partial class MainWindow : Window
         _timer.Tick += (_, _) => Tick();
         _timer.Start();
         Tick(); // 第一拍只做基线采样
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        if (_tray is not null)
+        {
+            _tray.Visible = false; // 先移除图标，再释放
+            _tray.Dispose();
+            _tray = null;
+        }
+        base.OnClosed(e);
+    }
+
+    // ---------- 系统托盘 ----------
+
+    private void InitTray()
+    {
+        _tray = new WinForms.NotifyIcon
+        {
+            Icon = MakeTrayIcon(),
+            Text = "DockGauge — 性能悬浮窗",
+            Visible = true,
+        };
+
+        var menu = new WinForms.ContextMenuStrip();
+        menu.Items.Add(new WinForms.ToolStripMenuItem("显示 / 隐藏悬浮窗", null, (_, _) => ToggleWindowVisibility()));
+        menu.Items.Add(new WinForms.ToolStripMenuItem("展开 / 收起面板", null, (_, _) => SetExpanded(!_expanded)));
+        menu.Items.Add(new WinForms.ToolStripSeparator());
+        _trayTop = new WinForms.ToolStripMenuItem("置顶显示") { CheckOnClick = true };
+        _trayTop.CheckedChanged += (_, _) => ApplyTopmost(_trayTop.Checked);
+        menu.Items.Add(_trayTop);
+        _trayAuto = new WinForms.ToolStripMenuItem("开机自启") { CheckOnClick = true };
+        _trayAuto.CheckedChanged += (_, _) => ApplyAutoStart(_trayAuto.Checked);
+        menu.Items.Add(_trayAuto);
+        menu.Items.Add(new WinForms.ToolStripSeparator());
+        menu.Items.Add(new WinForms.ToolStripMenuItem("退出", null, (_, _) => Close()));
+
+        _tray.ContextMenuStrip = menu;
+        _tray.MouseClick += (_, e) =>
+        {
+            if (e.Button == WinForms.MouseButtons.Left) ToggleWindowVisibility();
+        };
+    }
+
+    /// <summary>运行时绘制托盘图标：蓝色圆角底 + 白色仪表盘弧线与指针。</summary>
+    private static System.Drawing.Icon MakeTrayIcon()
+    {
+        using var bmp = new System.Drawing.Bitmap(32, 32);
+        using var g = System.Drawing.Graphics.FromImage(bmp);
+        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+        using (var path = new System.Drawing.Drawing2D.GraphicsPath())
+        {
+            path.AddArc(2, 2, 10, 10, 180, 90);
+            path.AddArc(20, 2, 10, 10, 270, 90);
+            path.AddArc(20, 20, 10, 10, 0, 90);
+            path.AddArc(2, 20, 10, 10, 90, 90);
+            path.CloseFigure();
+            using var lg = new System.Drawing.Drawing2D.LinearGradientBrush(
+                new System.Drawing.Point(0, 0), new System.Drawing.Point(0, 32),
+                System.Drawing.Color.FromArgb(0xFF, 0x3B, 0x79, 0xF6),
+                System.Drawing.Color.FromArgb(0xFF, 0x21, 0x54, 0xC4));
+            g.FillPath(lg, path);
+        }
+
+        using (var pen = new System.Drawing.Pen(System.Drawing.Color.White, 3f))
+        {
+            g.DrawArc(pen, 8, 9, 16, 16, -60, 240);
+        }
+        using (var pen = new System.Drawing.Pen(System.Drawing.Color.White, 3f))
+        {
+            pen.StartCap = System.Drawing.Drawing2D.LineCap.Round;
+            pen.EndCap = System.Drawing.Drawing2D.LineCap.Round;
+            g.DrawLine(pen, 16, 17, 22, 11);
+        }
+
+        var icon = (System.Drawing.Icon)System.Drawing.Icon.FromHandle(bmp.GetHicon()).Clone();
+        return icon;
+    }
+
+    private void ToggleWindowVisibility()
+    {
+        if (Visibility == Visibility.Visible)
+        {
+            Visibility = Visibility.Hidden;
+        }
+        else
+        {
+            PositionWindow();
+            Visibility = Visibility.Visible;
+        }
     }
 
     // ---------- 采样刷新 ----------
@@ -123,6 +223,7 @@ public partial class MainWindow : Window
 
     private void SetExpanded(bool expanded)
     {
+        if (Visibility != Visibility.Visible) Visibility = Visibility.Visible;
         _expanded = expanded;
         var wa = SystemParameters.WorkArea;
 
@@ -173,19 +274,34 @@ public partial class MainWindow : Window
         Root.ContextMenu.IsOpen = true;
     }
 
-    private void MenuTopmostClick(object? sender, RoutedEventArgs e)
+    private void ApplyTopmost(bool on)
     {
-        Topmost = _menuTopmost.IsChecked;
-        _cfg.Topmost = Topmost;
+        Topmost = on;
+        _cfg.Topmost = on;
         _cfg.Save();
+        SyncMenus();
     }
 
-    private void MenuAutoStartClick(object sender, RoutedEventArgs e)
+    private void ApplyAutoStart(bool on)
     {
-        SetAutoStart(_menuAutoStart.IsChecked);
-        _cfg.AutoStart = _menuAutoStart.IsChecked;
+        SetAutoStart(on);
+        _cfg.AutoStart = on;
         _cfg.Save();
+        SyncMenus();
     }
+
+    /// <summary>让窗口右键菜单与托盘菜单的勾选状态和实际状态一致。</summary>
+    private void SyncMenus()
+    {
+        _menuTopmost.IsChecked = Topmost;
+        _menuAutoStart.IsChecked = AutoStartEnabled();
+        if (_trayTop is not null) _trayTop.Checked = Topmost;
+        if (_trayAuto is not null) _trayAuto.Checked = _menuAutoStart.IsChecked;
+    }
+
+    private void MenuTopmostClick(object? sender, RoutedEventArgs e) => ApplyTopmost(_menuTopmost.IsChecked);
+
+    private void MenuAutoStartClick(object sender, RoutedEventArgs e) => ApplyAutoStart(_menuAutoStart.IsChecked);
 
     private void MenuExitClick(object sender, RoutedEventArgs e) => Close();
 
@@ -204,14 +320,14 @@ public partial class MainWindow : Window
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
-        // 菜单勾选状态与配置对齐
-        _menuTopmost.IsChecked = _cfg.Topmost;
-        _menuAutoStart.IsChecked = AutoStartEnabled();
-        if (_cfg.AutoStart != _menuAutoStart.IsChecked)
+        // 注册表自启状态与配置不一致时，以注册表为准并写回配置
+        var regAuto = AutoStartEnabled();
+        if (_cfg.AutoStart != regAuto)
         {
-            _cfg.AutoStart = _menuAutoStart.IsChecked;
+            _cfg.AutoStart = regAuto;
             _cfg.Save();
         }
+        SyncMenus();
     }
 
     private static bool AutoStartEnabled()

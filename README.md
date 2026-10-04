@@ -1,5 +1,7 @@
 # DockGauge
 
+[![Release](https://github.com/zoup0512/DockGauge/actions/workflows/release.yml/badge.svg)](https://github.com/zoup0512/DockGauge/actions/workflows/release.yml)
+
 > Windows 桌面性能监视悬浮窗 —— NAS 面板风格的 CPU / 内存 / 网络 / 磁盘监控小部件
 >
 > A floating performance monitor widget for Windows, styled after NAS dashboards.
@@ -20,8 +22,14 @@
   - 存储读写：R / W 速率 + 实时曲线
   - 存储空间：各本地磁盘已用 / 总容量与进度条
 - **右键菜单**（或顶栏设置按钮）：置顶显示、开机自启、退出
+- **系统托盘**：左键点击托盘图标显示 / 隐藏悬浮窗；右键菜单可切换面板、置顶、开机自启、退出。
+  托盘图标默认收在任务栏角溢出区，可在 *任务栏设置 → 其他系统托盘图标* 中设为常显
 - 窗口位置与配置自动保存在 `%LOCALAPPDATA%\DockGauge\config.json`
 - 无边框透明窗口 + 自绘控件，无第三方 UI 依赖，安装包极小
+
+## 下载
+
+到 [Releases](https://github.com/zoup0512/DockGauge/releases) 下载 `DockGauge-vX-win-x64.zip`，解压后运行 `DockGauge.exe` 即可（免安装；需要 [.NET Desktop Runtime 8](https://dotnet.microsoft.com/download/dotnet/8.0) 或更高版本）。
 
 ## 构建与运行
 

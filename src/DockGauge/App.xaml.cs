@@ -1,3 +1,5 @@
+using Application = System.Windows.Application;
+using MessageBox = System.Windows.MessageBox;
 using System.Threading;
 using System.Windows;
 

@@ -1,6 +1,13 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
+using Brush = System.Windows.Media.Brush;
+using Color = System.Windows.Media.Color;
+using FlowDirection = System.Windows.FlowDirection;
+using FontFamily = System.Windows.Media.FontFamily;
+using Pen = System.Windows.Media.Pen;
+using Point = System.Windows.Point;
+using Size = System.Windows.Size;
 
 namespace DockGauge.Controls;
 

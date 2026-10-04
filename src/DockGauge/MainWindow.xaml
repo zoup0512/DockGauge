@@ -5,7 +5,7 @@
         Title="DockGauge"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True"
-        Width="480" Height="72"
+        Width="320" Height="48"
         FontFamily="Microsoft YaHei UI" UseLayoutRounding="True"
         TextOptions.TextRenderingMode="ClearType" TextOptions.TextFormattingMode="Display">
 
@@ -76,6 +76,11 @@
     </Window.Resources>
 
     <Grid x:Name="Root" MouseLeftButtonDown="RootDragMove">
+        <Grid.LayoutTransform>
+            <!-- 整体缩放 2/3：字体、图表、间距等比缩小 -->
+            <ScaleTransform ScaleX="0.6666666666666667" ScaleY="0.6666666666666667"/>
+        </Grid.LayoutTransform>
+
 
         <!-- ============ 紧凑悬浮条 ============ -->
         <Grid x:Name="CompactRoot" Margin="10">
