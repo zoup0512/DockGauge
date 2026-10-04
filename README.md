@@ -7,10 +7,10 @@
 > A floating performance monitor widget for Windows, styled after NAS dashboards.
 
 <p align="center">
-  <img src="docs/screenshot-compact.png" alt="紧凑悬浮条" width="480"/>
+  <img src="docs/screenshot-compact.png" alt="紧凑悬浮条" width="540"/>
 </p>
 <p align="center">
-  <img src="docs/screenshot-expanded.png" alt="展开面板" width="380"/>
+  <img src="docs/screenshot-expanded.png" alt="展开面板" width="360"/>
 </p>
 
 ## 特性
