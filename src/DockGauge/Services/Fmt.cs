@@ -8,7 +8,7 @@ public static class Fmt
     public static string Speed(double bytesPerSec)
     {
         if (bytesPerSec < 1024) return $"{Math.Round(bytesPerSec)} B/s";
-        var (v, u) = Split(bytesPerSec, "0.##");
+        var (v, u) = Split(bytesPerSec, "0.0");
         return $"{v} {u}/s";
     }
 
